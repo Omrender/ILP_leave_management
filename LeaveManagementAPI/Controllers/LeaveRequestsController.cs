@@ -63,16 +63,57 @@ public class LeaveRequestsController : ControllerBase
     }
 
     [HttpPut("approve")]
-    [Authorize(Roles = "Manager")]
-    public IActionResult ApproveRequest(LeaveApprovalDto dto)
+[Authorize(Roles = "Manager")]
+public IActionResult ApproveRequest(LeaveApprovalDto dto)
+{
+    var request = _context.LeaveRequests.Find(dto.LeaveRequestId);
+    if (request == null) return NotFound();
+
+    if (dto.Status == "Approved")
     {
-        var request = _context.LeaveRequests.Find(dto.LeaveRequestId);
-        if (request == null) return NotFound();
+        var leaveDays = (request.ToDate - request.FromDate).TotalDays + 1;
 
-        request.Status = dto.Status;
-        request.ApprovedById = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        _context.SaveChanges();
+        var balance = _context.LeaveBalances.FirstOrDefault(lb =>
+            lb.UserId == request.UserId &&
+            lb.LeaveTypeId == request.LeaveTypeId &&
+            lb.Year == DateTime.UtcNow.Year);
 
-        return Ok(request);
+        if (balance == null)
+        {
+            // DEBUG: show all balances for this user for troubleshooting
+            var debugBalances = _context.LeaveBalances
+                .Where(lb => lb.UserId == request.UserId)
+                .ToList();
+
+            Console.WriteLine($"No matching balance found for UserId={request.UserId}, LeaveTypeId={request.LeaveTypeId}, Year={DateTime.UtcNow.Year}");
+            Console.WriteLine($"Existing balances for user: {debugBalances.Count}");
+            foreach (var b in debugBalances)
+            {
+                Console.WriteLine($"→ TypeId={b.LeaveTypeId}, Year={b.Year}, Used={b.Used}");
+            }
+
+            return BadRequest("No leave balance found.");
+        }
+
+        if ((balance.Used + leaveDays) > 43)
+            return BadRequest("Not enough leave balance.");
+
+        Console.WriteLine($"[DEBUG] Leave balance before: {balance.Used}");
+        balance.Used += (int)leaveDays;
+        Console.WriteLine($"[DEBUG] Leave balance after: {balance.Used}");
+
+        _context.LeaveBalances.Update(balance); // ensure tracked
     }
+
+    request.Status = dto.Status;
+    request.ApprovedById = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    _context.LeaveRequests.Update(request); // good to have
+
+    _context.SaveChanges();
+
+    return Ok(request);
+}
+
+
+
 }
