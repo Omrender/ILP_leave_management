@@ -193,3 +193,4 @@ C:\Users\labadmin\Desktop\me\LeaveManagementAPI\obj\Debug\net9.0\refint\LeaveMan
 C:\Users\labadmin\Desktop\me\LeaveManagementAPI\obj\Debug\net9.0\LeaveManagementAPI.pdb
 C:\Users\labadmin\Desktop\me\LeaveManagementAPI\obj\Debug\net9.0\LeaveManagementAPI.genruntimeconfig.cache
 C:\Users\labadmin\Desktop\me\LeaveManagementAPI\obj\Debug\net9.0\ref\LeaveManagementAPI.dll
+C:\Users\labadmin\Desktop\me\LeaveManagementAPI\obj\Debug\net9.0\LeaveManagementAPI.sourcelink.json
