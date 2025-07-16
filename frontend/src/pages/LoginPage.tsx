@@ -18,20 +18,37 @@ const LoginPage = () => {
       navigate(role === 'Manager' ? '/manager' : '/employee');
     } catch (err: any) {
       if (err.response?.status === 401) {
-        alert("User not found. Redirecting to register...");
-        navigate('/register');
+        alert("User not found.");
       } else {
         alert("Login failed.");
       }
     }
   };
 
+  const goToRegister = () => {
+    navigate('/register');
+  };
+
   return (
     <form onSubmit={handleLogin}>
       <h2>Login</h2>
-      <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required /><br/>
-      <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required /><br/>
+      <input
+        placeholder="Email"
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        required
+      /><br />
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={e => setPassword(e.target.value)}
+        required
+      /><br />
       <button type="submit">Login</button>
+      <button type="button" onClick={goToRegister} style={{ marginLeft: '10px' }}>
+        New User? Register
+      </button>
     </form>
   );
 };
